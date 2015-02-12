@@ -157,9 +157,9 @@ BOOL CMFCListMacDlg::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化代码
 	
-	char m_strRemoteMachine[100] = {0}; // .Format("%s","192.168.3.10");  
+	CString m_strRemoteMachine("192.168.3.28");  
 	CPing myPing;  
-	strcpy(m_strRemoteMachine, "192.168.3.28");
+	//strcpy(m_strRemoteMachine, "192.168.3.28");
 	bool blPing=myPing.Ping(5,m_strRemoteMachine,this->m_hWnd);  
 	ZeroMemory(szSaveFileName, sizeof(szSaveFileName));
 	ZeroMemory(szSuffix, sizeof(szSuffix));
