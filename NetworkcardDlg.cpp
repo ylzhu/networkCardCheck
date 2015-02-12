@@ -7,6 +7,7 @@
 #include "NetworkcardDlg.h"
 #include "afxdialogex.h"
 #include "windows.h"
+#include "ping.h"
 
 //#param warning(disable:4996)
 
@@ -15,7 +16,7 @@
 #endif
 
 
-char *w2c(char *pcstr, const wchar_t *pwstr, size_t len)
+char *w2c(char *pcstr, const WCHAR *pwstr, size_t len)
 {
 	int nlength = wcslen(pwstr);
 
@@ -155,24 +156,29 @@ BOOL CMFCListMacDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+	
+	char m_strRemoteMachine[100] = {0}; // .Format("%s","192.168.3.10");  
+	CPing myPing;  
+	strcpy(m_strRemoteMachine, "192.168.3.28");
+	bool blPing=myPing.Ping(5,m_strRemoteMachine,this->m_hWnd);  
 	ZeroMemory(szSaveFileName, sizeof(szSaveFileName));
 	ZeroMemory(szSuffix, sizeof(szSuffix));
 	ZeroMemory(szBlankChar, sizeof(szBlankChar));
 	ZeroMemory(szPath, sizeof(szPath));
 	
 	//strcpy(szSaveFileName, "MacAddressList");
-	wcscpy_s(szSaveFileName, "MacAddressList");
-	wcscpy_s(szSuffix, TEXT("cer"));
-	wcscpy_s(szBlankChar, TEXT("-"));
-	SetDlgItemTextW(IDC_EDIT_SUFFIX, szSuffix);
-	SetDlgItemTextW(IDC_EDIT_BLANK_CHAR, szBlankChar);
-	SetDlgItemTextW(IDC_EDIT_SAVE_FILENAME, szSaveFileName);
+	strcpy(szSaveFileName, "MacAddressList");
+	strcpy(szSuffix, ("cer"));
+	strcpy(szBlankChar, ("-"));
+	SetDlgItemText(IDC_EDIT_SUFFIX, szSuffix);
+	SetDlgItemText(IDC_EDIT_BLANK_CHAR, szBlankChar);
+	SetDlgItemText(IDC_EDIT_SAVE_FILENAME, szSaveFileName);
 
-	SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("默认后缀名:"));
+	SendDlgListboxMessage(IDC_LISTBOX_MSG, ("默认后缀名:"));
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szSuffix);
-	SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("默认过滤间隔符:"));
+	SendDlgListboxMessage(IDC_LISTBOX_MSG, ("默认过滤间隔符:"));
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szBlankChar);
-	SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("默认保存文件名:"));
+	SendDlgListboxMessage(IDC_LISTBOX_MSG, ("默认保存文件名:"));
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szSaveFileName);
 
 	((CButton*)GetDlgItem(IDC_CHECK1))->SetCheck(1);
@@ -180,7 +186,7 @@ BOOL CMFCListMacDlg::OnInitDialog()
 	{
 		// 勾选
 		u8checkBoxStatus = 1;
-		SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("列表信息去除文件后缀."));
+		SendDlgListboxMessage(IDC_LISTBOX_MSG, ("列表信息去除文件后缀."));
 	}
 	else
 	{
@@ -248,10 +254,10 @@ void CMFCListMacDlg::OnEnChangeBlank_char()
 	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
 
 	// TODO:  在此添加控件通知处理程序代码
-	GetDlgItemTextW(IDC_EDIT_BLANK_CHAR, szBlankChar, 20);
-	//GetDlgItemTextW(IDC_EDIT_BLANK_CHAR, szBlankChar);
-	//GetDlgItemTextW(IDC_EDIT_SAVE_FILENAME, szSaveFileName);
-	//SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("去除:"));
+	GetDlgItemText(IDC_EDIT_BLANK_CHAR, szBlankChar, 20);
+	//GetDlgItemText(IDC_EDIT_BLANK_CHAR, szBlankChar);
+	//GetDlgItemText(IDC_EDIT_SAVE_FILENAME, szSaveFileName);
+	//SendDlgListboxMessage(IDC_LISTBOX_MSG, ("去除:"));
 	//SendDlgListboxMessage(IDC_LISTBOX_MSG, szBlankChar);
 
 }
@@ -263,19 +269,21 @@ void CMFCListMacDlg::OnBnClickedButtonCurrentPath()
 	GetCurrentDirectory(sizeof(szPath), szPath);
 	//MessageBox(szPath);
 	//SetWindowTextW(GetDlgItem(hDlg, IDC_BUTTON_CURRENT_PATH), _T(""));
-	SetDlgItemTextW(IDC_STATIC_PATH, szPath);
+	SetDlgItemText(IDC_STATIC_PATH, szPath);
 
-	//SetDlgItemTextW(IDC_LISTBOX_MSG, TEXT("Current path:"));
-	//SetDlgItemTextW(IDC_LISTBOX_MSG, szPath);
+	//SetDlgItemText(IDC_LISTBOX_MSG, ("Current path:"));
+	//SetDlgItemText(IDC_LISTBOX_MSG, szPath);
 
-	SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("Current path:"));
+	SendDlgListboxMessage(IDC_LISTBOX_MSG, ("Current path:"));
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szPath);
 }
 
-void CMFCListMacDlg::SendDlgListboxMessage(int listboxID, TCHAR* szString)
+void CMFCListMacDlg::SendDlgListboxMessage(int listboxID, char* szString)
 {
 #if 1
 	long lNumber;
+	//WCHAR strWtmp[256] = {0};
+	//c2w(strWtmp, strlen(szString), szString);
 	SendDlgItemMessage(listboxID, LB_ADDSTRING, NULL, reinterpret_cast<LPARAM>(szString));	//打印字串到listbox
 	lNumber = SendDlgItemMessage(listboxID, LB_GETCOUNT, NULL, NULL);						//获取listbox中字串数目
 	SendDlgItemMessage(listboxID, LB_SETCURSEL, lNumber - 1, 0);							//使本字串反选, 同时可以使字串在listbox的可见区域.
@@ -289,7 +297,7 @@ void CMFCListMacDlg::SendDlgListboxMessage(int listboxID, TCHAR* szString)
 void CMFCListMacDlg::OnBnClickedButtonOtherPath()
 {
 	// TODO:  在此添加控件通知处理程序代码
-	WCHAR szPath_tmp[MAX_PATH];     //存放选择的目录路径 
+	char szPath_tmp[MAX_PATH];     //存放选择的目录路径 
 	//CString str;
 
 	ZeroMemory(szPath_tmp, sizeof(szPath_tmp));
@@ -298,7 +306,7 @@ void CMFCListMacDlg::OnBnClickedButtonOtherPath()
 	bi.hwndOwner = m_hWnd;
 	bi.pidlRoot = NULL;
 	bi.pszDisplayName = szPath_tmp;
-	bi.lpszTitle = TEXT("请选择需要打包的目录：");
+	bi.lpszTitle = ("请选择需要打包的目录：");
 	bi.ulFlags = 0;
 	bi.lpfn = NULL;
 	bi.lParam = 0;
@@ -308,19 +316,19 @@ void CMFCListMacDlg::OnBnClickedButtonOtherPath()
 
 	if (lp && SHGetPathFromIDList(lp, szPath_tmp))
 	{
-		//str.Format(TEXT("选择的目录为 %s"), szPath);
+		//str.Format(("选择的目录为 %s"), szPath);
 		//MessageBox(str);
-		wcscpy_s(szPath, szPath_tmp);
-		SetDlgItemTextW(IDC_STATIC_PATH, szPath);
-		SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("Select path:"));
+		strcpy(szPath, szPath_tmp);
+		SetDlgItemText(IDC_STATIC_PATH, szPath);
+		SendDlgListboxMessage(IDC_LISTBOX_MSG, ("Select path:"));
 		SendDlgListboxMessage(IDC_LISTBOX_MSG, szPath);
 
 
 	}
 	else
 	{
-		MessageBox(TEXT("无效的目录，请重新选择"));
-		SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("无效的目录，请重新选择"));
+		MessageBox(("无效的目录，请重新选择"));
+		SendDlgListboxMessage(IDC_LISTBOX_MSG, ("无效的目录，请重新选择"));
 	}
 		
 }
@@ -334,10 +342,10 @@ void CMFCListMacDlg::OnEnChangeEditSuffix()
 	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
 
 	// TODO:  在此添加控件通知处理程序代码
-	GetDlgItemTextW(IDC_EDIT_SUFFIX, szSuffix, 20);
-	//GetDlgItemTextW(IDC_EDIT_BLANK_CHAR, szBlankChar);
-	//GetDlgItemTextW(IDC_EDIT_SAVE_FILENAME, szSaveFileName);
-	//SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("后缀名改为:"));
+	GetDlgItemText(IDC_EDIT_SUFFIX, szSuffix, 20);
+	//GetDlgItemText(IDC_EDIT_BLANK_CHAR, szBlankChar);
+	//GetDlgItemText(IDC_EDIT_SAVE_FILENAME, szSaveFileName);
+	//SendDlgListboxMessage(IDC_LISTBOX_MSG, ("后缀名改为:"));
 	//SendDlgListboxMessage(IDC_LISTBOX_MSG, szSuffix);
 	
 }
@@ -350,12 +358,12 @@ void CMFCListMacDlg::OnBnClickedCheck1()
 	{
 		// 勾选
 		u8checkBoxStatus = 1;
-		//SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("列表信息去除文件后缀."));
+		//SendDlgListboxMessage(IDC_LISTBOX_MSG, ("列表信息去除文件后缀."));
 	}
 	else
 	{
 		u8checkBoxStatus = 0;
-		//SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("列表信息保留文件后缀."));
+		//SendDlgListboxMessage(IDC_LISTBOX_MSG, ("列表信息保留文件后缀."));
 	}
 }
 
@@ -368,22 +376,22 @@ void CMFCListMacDlg::OnEnChangeEditSaveFilename()
 	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
 
 	// TODO:  在此添加控件通知处理程序代码
-	GetDlgItemTextW(IDC_EDIT_SAVE_FILENAME, szSaveFileName, 50);
+	GetDlgItemText(IDC_EDIT_SAVE_FILENAME, szSaveFileName, 50);
 	
-	//SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("文件名:"));
+	//SendDlgListboxMessage(IDC_LISTBOX_MSG, ("文件名:"));
 	//SendDlgListboxMessage(IDC_LISTBOX_MSG, szSaveFileName);
 }
 
 #if 0
  DWORD WINAPI CMFCListMacDlg::FindFileThread(LPVOID lpParameter)
 {
-	WCHAR szPath_tmp[500];
-	WCHAR szMacstr[50];
-	WCHAR szWildcard[20];
-	WCHAR szFileName[MAX_PATH];
+	char szPath_tmp[500];
+	char szMacstr[50];
+	char szWildcard[20];
+	char szFileName[MAX_PATH];
 	char szFilename_c[MAX_PATH];
 
-	WCHAR szRecordNum[60];
+	char szRecordNum[60];
 	char szRecordNum_c[60];
 
 	WIN32_FIND_DATA p;
@@ -409,11 +417,11 @@ void CMFCListMacDlg::OnEnChangeEditSaveFilename()
 	len = wcslen(szPath);
 	if (szPath[len - 1] == '\\')
 	{
-		_tcscpy(szWildcard, TEXT("*."));
+		_tcscpy(szWildcard, ("*."));
 	}
 	else
 	{
-		_tcscpy(szWildcard, TEXT("\\*."));
+		_tcscpy(szWildcard, ("\\*."));
 	}
 	_tcscpy(szPath_tmp, szPath);
 	_tcscat(szPath_tmp, szWildcard);
@@ -433,7 +441,7 @@ void CMFCListMacDlg::OnEnChangeEditSaveFilename()
 	else
 	{
 		((CButton*)GetDlgItem(IDOK))->EnableWindow(TRUE);
-		SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("No file found!"));
+		SendDlgListboxMessage(IDC_LISTBOX_MSG, ("No file found!"));
 		return 0;
 	}
 	while (FindNextFile(h, &p))
@@ -446,14 +454,14 @@ void CMFCListMacDlg::OnEnChangeEditSaveFilename()
 	}
 	FindClose(h);
 	// print record number.
-	_tcscpy(szRecordNum, TEXT("record number: "));
+	_tcscpy(szRecordNum, ("record number: "));
 	w2c(szRecordNum_c, szRecordNum, sizeof(szRecordNum));
 	sprintf(szRecordNum_c, "%s%04d", szRecordNum_c, record);
 	c2w(szRecordNum, sizeof(szRecordNum_c), szRecordNum_c);
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szRecordNum);
 
 	// print save file name.
-	SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("Mac list save to file:"));
+	SendDlgListboxMessage(IDC_LISTBOX_MSG, ("Mac list save to file:"));
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szFileName);
 	((CButton*)GetDlgItem(IDOK))->EnableWindow(TRUE);
 	return 1;
@@ -467,13 +475,13 @@ void CMFCListMacDlg::OnBnClickedOk()
 	// TODO:  在此添加控件通知处理程序代码
 	//CDialogEx::OnOK();
 #if 1
-	WCHAR szPath_tmp[500];
-	WCHAR szMacstr[50];
-	WCHAR szWildcard[20];
-	WCHAR szFileName[MAX_PATH];
+	char szPath_tmp[500];
+	char szMacstr[50];
+	char szWildcard[20];
+	char szFileName[MAX_PATH];
 	char szFilename_c[MAX_PATH];
 
-	WCHAR szRecordNum[60];
+	char szRecordNum[60];
 	char szRecordNum_c[60];
 
 	WIN32_FIND_DATA p;
@@ -490,20 +498,21 @@ void CMFCListMacDlg::OnBnClickedOk()
 	((CButton*)GetDlgItem(IDOK))->EnableWindow(FALSE);
 
 	GetLocalTime(&sys);
-	_tcscpy(szFileName, szSaveFileName);
-	w2c(szFilename_c, szFileName, sizeof(szFileName));
+	strcpy(szFileName, szSaveFileName);
+	strcpy(szFilename_c, szFileName);
+	//w2c(szFilename_c, szFileName, sizeof(szFileName));
 	sprintf(szFilename_c, "%s%04d", szFilename_c, sys.wMilliseconds);
-	c2w(szFileName, sizeof(szFilename_c), szFilename_c);
-	SendDlgListboxMessage(IDC_LISTBOX_MSG, szFileName);
+	//c2w(szFileName, sizeof(szFilename_c), szFilename_c);
+	SendDlgListboxMessage(IDC_LISTBOX_MSG, szFilename_c);
 
-	len = wcslen(szPath);
+	len = strlen(szPath);
 	if (szPath[len - 1] == '\\')
 	{
-		_tcscpy(szWildcard, TEXT("*."));
+		_tcscpy(szWildcard, ("*."));
 	}
 	else
 	{
-		_tcscpy(szWildcard, TEXT("\\*."));
+		_tcscpy(szWildcard, ("\\*."));
 	}
 	_tcscpy(szPath_tmp, szPath);
 	_tcscat(szPath_tmp, szWildcard);
@@ -523,7 +532,7 @@ void CMFCListMacDlg::OnBnClickedOk()
 	else
 	{
 		((CButton*)GetDlgItem(IDOK))->EnableWindow(TRUE);
-		SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("No file found!"));
+		SendDlgListboxMessage(IDC_LISTBOX_MSG, ("No file found!"));
 		return;
 	}
 	while (FindNextFile(h, &p))
@@ -536,14 +545,14 @@ void CMFCListMacDlg::OnBnClickedOk()
 	}
 	FindClose(h);
 	// print record number.
-	_tcscpy(szRecordNum, TEXT("record number: "));
-	w2c(szRecordNum_c, szRecordNum, sizeof(szRecordNum));
-	sprintf(szRecordNum_c, "%s%04d", szRecordNum_c, record);
-	c2w(szRecordNum, sizeof(szRecordNum_c), szRecordNum_c);
+	_tcscpy(szRecordNum, ("record number: "));
+	//w2c(szRecordNum_c, szRecordNum, sizeof(szRecordNum));
+	sprintf(szRecordNum, "%s%04d", szRecordNum, record);
+	//c2w(szRecordNum, sizeof(szRecordNum_c), szRecordNum_c);
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szRecordNum);
 
 	// print save file name.
-	SendDlgListboxMessage(IDC_LISTBOX_MSG, TEXT("Mac list save to file:"));
+	SendDlgListboxMessage(IDC_LISTBOX_MSG, ("Mac list save to file:"));
 	SendDlgListboxMessage(IDC_LISTBOX_MSG, szFileName);
 	((CButton*)GetDlgItem(IDOK))->EnableWindow(TRUE);
 #endif
@@ -552,21 +561,21 @@ void CMFCListMacDlg::OnBnClickedOk()
 #endif
 }
 
-void CMFCListMacDlg::SeparateMacWithRule(TCHAR* szString, TCHAR* szMacString)
+void CMFCListMacDlg::SeparateMacWithRule(char* szString, char* szMacString)
 {
-	WCHAR szInputStr[50] = TEXT("");
+	char szInputStr[50] = ("");
 	_tcscpy(szInputStr, szString);
 	int lenInputStr = 0;
 	int lenBlanChar = 0;
 	int numi = 0, numj = 0, numk = 0;
 	
-	lenInputStr = wcslen(szInputStr);
-	lenBlanChar = wcslen(szBlankChar);
+	lenInputStr = strlen(szInputStr);
+	lenBlanChar = strlen(szBlankChar);
 	for (numi = 0; numi < lenInputStr; numi++)
 	{
-		if (szInputStr[numi] == TEXT('.'))
+		if (szInputStr[numi] == ('.'))
 		{
-			szInputStr[numi] = TEXT('\0');
+			szInputStr[numi] = ('\0');
 			lenInputStr = numi + 1;
 			break;
 		}
@@ -589,10 +598,10 @@ void CMFCListMacDlg::SeparateMacWithRule(TCHAR* szString, TCHAR* szMacString)
 	_tcscpy(szMacString, szInputStr);
 }
 
-void CMFCListMacDlg::WriteMacToFile(TCHAR* szMacString, TCHAR* szfileName)
+void CMFCListMacDlg::WriteMacToFile(char* szMacString, char* szfileName)
 {
-	WCHAR szInputStr[50] = TEXT("");
-	WCHAR szFileName[MAX_PATH] = TEXT("");
+	char szInputStr[50] = ("");
+	char szFileName[MAX_PATH] = ("");
 	FILE *pStream = NULL;
 
 	ZeroMemory(szInputStr, sizeof(szInputStr));
@@ -601,13 +610,13 @@ void CMFCListMacDlg::WriteMacToFile(TCHAR* szMacString, TCHAR* szfileName)
 	_tcscpy(szInputStr, szMacString);
 
 	_tcscpy(szFileName, szfileName);
-	_tcscat(szFileName, TEXT(".csv"));
+	_tcscat(szFileName, (".csv"));
 
-	pStream = _wfopen(szFileName, TEXT("a+"));
+	pStream = fopen(szFileName, ("a+"));
 	if (pStream)
 	{
-		fwprintf(pStream, szInputStr);
-		fwprintf(pStream, TEXT(",\n"));
+		fprintf(pStream, szInputStr);
+		fprintf(pStream, (",\n"));
 	}
 	fclose(pStream);
 }

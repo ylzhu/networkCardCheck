@@ -33,18 +33,18 @@ public:
 	afx_msg void OnEnChangeBlank_char();
 	afx_msg void OnBnClickedButtonCurrentPath();
 
-	void SendDlgListboxMessage(int listboxID, TCHAR* szString);
-	void SeparateMacWithRule(TCHAR* szString, TCHAR* szMacString);
-	void WriteMacToFile(TCHAR* szMacString, TCHAR* szfileName);
+	void SendDlgListboxMessage(int listboxID, char* szString);
+	void SeparateMacWithRule(char* szString, char* szMacString);
+	void WriteMacToFile(char* szMacString, char* szfileName);
 #if 0
 	static DWORD WINAPI FindFileThread(LPVOID lpParameter);
 #endif
 
 public:
-	WCHAR szPath[255];
-	WCHAR szSaveFileName[255];
-	WCHAR szSuffix[255];
-	WCHAR szBlankChar[255];
+	char szPath[255];
+	char szSaveFileName[255];
+	char szSuffix[255];
+	char szBlankChar[255];
 	unsigned char u8checkBoxStatus;
 	afx_msg void OnBnClickedButtonOtherPath();
 	afx_msg void OnEnChangeEditSuffix();
